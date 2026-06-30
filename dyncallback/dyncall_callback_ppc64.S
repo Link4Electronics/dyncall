@@ -146,11 +146,36 @@ Input:
 #endif
 	bctrl
 
-	/* check result type */
-	cmpi    cr0, 0, r3, 0x66 /* 'f */
+	/* check result type and load appropriate width */
+	/* r3 contains type character from handler:
+	   'v'=void, 'B'=bool, 'c'=byte, 's'=short, 'i'=int,
+	   'l'=long, 'p'=ptr, 'f'=float, 'd'=double
+	   DCValue union stores all integer types at same offset.
+	   On big-endian, ld reads 8 bytes as BE integer, which
+	   places a 32-bit int in the upper 32 bits of r3.
+	   Must use lwz/lhz/lbz for sub-64-bit types. */
+	cmpi    cr0, 0, r3, 0x66 /* 'f' */
 	beq     .f32
-	cmpi    cr0, 0, r3, 0x64 /* 'd */
+	cmpi    cr0, 0, r3, 0x64 /* 'd' */
 	beq     .f64
+	cmpi    cr0, 0, r3, 0x6c /* 'l' (long) */
+	beq     .i64
+	cmpi    cr0, 0, r3, 0x70 /* 'p' (pointer) */
+	beq     .i64
+	cmpi    cr0, 0, r3, 0x69 /* 'i' (int) */
+	beq     .i32
+	cmpi    cr0, 0, r3, 0x73 /* 's' (short) */
+	beq     .i16
+	/* default: 'B' (bool) or 'c' (byte) */
+.i8:
+	lbz     r3, SP_RESULT(r1)
+	b       .end
+.i16:
+	lhz     r3, SP_RESULT(r1)
+	b       .end
+.i32:
+	lwz     r3, SP_RESULT(r1)
+	b       .end
 .i64:
 	ld      r3, SP_RESULT(r1)
 	b       .end
