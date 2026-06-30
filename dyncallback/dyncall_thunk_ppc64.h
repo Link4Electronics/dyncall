@@ -40,11 +40,11 @@ struct DCThunk_              /* v1 */
 #else
 struct DCThunk_              /* v2 */
 {
-  unsigned short addr_self_hist, code_load_hist;  /* offset:  0 */
-  unsigned short addr_self_hier, code_load_hier;  /* offset:  4 */
+  unsigned short code_load_hist, addr_self_hist;  /* offset:  0 */
+  unsigned short code_load_hier, addr_self_hier;  /* offset:  4 */
   unsigned int   code_rot;                        /* offset:  8 */
-  unsigned short addr_self_hi, code_load_hi;      /* offset: 12 */
-  unsigned short addr_self_lo, code_load_lo;      /* offset: 16 */
+  unsigned short code_load_hi, addr_self_hi;      /* offset: 12 */
+  unsigned short code_load_lo, addr_self_lo;      /* offset: 16 */
   unsigned int   code_jump[5];                    /* offset: 20 */
   void          (*addr_entry)();                  /* offset: 40 */
 };
